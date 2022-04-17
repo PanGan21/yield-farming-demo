@@ -4,10 +4,10 @@ pragma solidity 0.8.4;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AmazingToken is ERC20, Ownable {
-    constructor() ERC20("AmazingToken", "AMZ") {}
+contract MockERC20 is ERC20 {
+    constructor(string memory name, string memory ticker) ERC20(name, ticker) {}
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) public {
         _mint(to, amount);
     }
 }

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -10,8 +11,8 @@ contract TokenFarm {
     mapping(address => bool) public isStaking;
     // userAddress => timeStamp
     mapping(address => uint256) public startTime;
-    // userAddress => amzTknBalance
-    mapping(address => uint256) public amzTknBalance;
+    // userAddress => amazingTokenBalance
+    mapping(address => uint256) public amazingTokenBalance;
 
     string public name = "TokenFarm";
 
@@ -24,7 +25,7 @@ contract TokenFarm {
 
     constructor(IERC20 _daiToken, AmazingToken _amazingToken) {
         daiToken = _daiToken;
-        AmazingToken = _amazingToken;
+        amazingToken = _amazingToken;
     }
 
     function stake(uint256 amount) public {
@@ -35,7 +36,7 @@ contract TokenFarm {
 
         if (isStaking[msg.sender] == true) {
             uint256 toTransfer = calculateYieldTotal(msg.sender);
-            amzTknBalance[msg.sender] += toTransfer;
+            amazingTokenBalance[msg.sender] += toTransfer;
         }
 
         daiToken.transferFrom(msg.sender, address(this), amount);
@@ -58,7 +59,7 @@ contract TokenFarm {
         amount = 0;
         stakingBalance[msg.sender] -= balanceTransfer;
         daiToken.transfer(msg.sender, balanceTransfer);
-        amzTknBalance[msg.sender] += yieldTransfer;
+        amazingTokenBalance[msg.sender] += yieldTransfer;
         if (stakingBalance[msg.sender] == 0) {
             isStaking[msg.sender] = false;
         }
@@ -69,18 +70,18 @@ contract TokenFarm {
         uint256 toTransfer = calculateYieldTotal(msg.sender);
 
         require(
-            toTransfer > 0 || amzTknBalance[msg.sender] > 0,
+            toTransfer > 0 || amazingTokenBalance[msg.sender] > 0,
             "Nothing to withdraw"
         );
 
-        if (amzTknBalance[msg.sender] != 0) {
-            uint256 oldBalance = amzTknBalance[msg.sender];
-            amzTknBalance[msg.sender] = 0;
+        if (amazingTokenBalance[msg.sender] != 0) {
+            uint256 oldBalance = amazingTokenBalance[msg.sender];
+            amazingTokenBalance[msg.sender] = 0;
             toTransfer += oldBalance;
         }
 
         startTime[msg.sender] = block.timestamp;
-        amzTknToken.mint(msg.sender, toTransfer);
+        amazingToken.mint(msg.sender, toTransfer);
         emit YieldWithdraw(msg.sender, toTransfer);
     }
 
