@@ -223,8 +223,8 @@
       ]
     },
     "/Users/panagiotisganelis/Projects/blockchain-learning/yield-farming-demo/contracts/TokenFarm.sol": {
-      "lastModificationDate": 1650199346047,
-      "contentHash": "84a939c1a67aed4567726b81608d0e6a",
+      "lastModificationDate": 1650238403036,
+      "contentHash": "5fd272baa421a9db28ad398f090e58e9",
       "sourceName": "contracts/TokenFarm.sol",
       "solcConfig": {
         "version": "0.8.4",

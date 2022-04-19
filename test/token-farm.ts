@@ -31,7 +31,7 @@ describe("TokenFarm", () => {
     tokenFarm = await TokenFarm.deploy(mockDai.address, amazingToken.address);
   });
 
-  describe("Init", async () => {
+  describe("init", async () => {
     it("should initialize", async () => {
       expect(await amazingToken).to.be.ok;
       expect(await amazingToken).to.be.ok;
@@ -39,9 +39,9 @@ describe("TokenFarm", () => {
     });
   });
 
-  describe("Stake", async () => {
+  describe("stake", async () => {
     it("should accept DAI and update mapping", async () => {
-      let toTransfer = ethers.utils.parseEther("100");
+      const toTransfer = ethers.utils.parseEther("100");
       await mockDai.connect(alice).approve(tokenFarm.address, toTransfer);
 
       expect(await tokenFarm.isStaking(alice.address)).to.eq(false);
@@ -54,7 +54,7 @@ describe("TokenFarm", () => {
     });
 
     it("should update balance with multiple stakes", async () => {
-      let toTransfer = ethers.utils.parseEther("100");
+      const toTransfer = ethers.utils.parseEther("100");
       await mockDai.connect(alice).approve(tokenFarm.address, toTransfer);
       await tokenFarm.connect(alice).stake(toTransfer);
 
@@ -67,7 +67,7 @@ describe("TokenFarm", () => {
     });
 
     it("should revert with not enough funds", async () => {
-      let toTransfer = ethers.utils.parseEther("1000000");
+      const toTransfer = ethers.utils.parseEther("1000000");
       await mockDai.approve(tokenFarm.address, toTransfer);
 
       await expect(tokenFarm.connect(bob).stake(toTransfer)).to.be.revertedWith(
@@ -76,15 +76,15 @@ describe("TokenFarm", () => {
     });
   });
 
-  describe("Unstake", async () => {
+  describe("unstake", async () => {
     beforeEach(async () => {
-      let toTransfer = ethers.utils.parseEther("100");
+      const toTransfer = ethers.utils.parseEther("100");
       await mockDai.connect(alice).approve(tokenFarm.address, toTransfer);
       await tokenFarm.connect(alice).stake(toTransfer);
     });
 
     it("should unstake balance from user", async () => {
-      let toTransfer = ethers.utils.parseEther("100");
+      const toTransfer = ethers.utils.parseEther("100");
       await tokenFarm.connect(alice).unstake(toTransfer);
 
       res = await tokenFarm.stakingBalance(alice.address);
@@ -94,16 +94,16 @@ describe("TokenFarm", () => {
     });
   });
 
-  describe("WithdrawYield", async () => {
+  describe("withdrawYield", async () => {
     beforeEach(async () => {
       await amazingToken.transferOwnership(tokenFarm.address);
-      let toTransfer = ethers.utils.parseEther("10");
+      const toTransfer = ethers.utils.parseEther("10");
       await mockDai.connect(alice).approve(tokenFarm.address, toTransfer);
       await tokenFarm.connect(alice).stake(toTransfer);
     });
 
     it("should return correct yield time", async () => {
-      let timeStart = await tokenFarm.startTime(alice.address);
+      const timeStart = await tokenFarm.startTime(alice.address);
       expect(Number(timeStart)).to.be.greaterThan(0);
 
       // Fast-forward time
@@ -115,12 +115,12 @@ describe("TokenFarm", () => {
     it("should mint correct token amount in total supply and user", async () => {
       await time.increase(86400);
 
-      let _time = await tokenFarm.calculateYieldTime(alice.address);
-      let formatTime = _time / 86400;
-      let staked = await tokenFarm.stakingBalance(alice.address);
-      let bal = staked * formatTime;
-      let newBal = ethers.utils.formatEther(bal.toString());
-      let expected = Number.parseFloat(newBal).toFixed(3);
+      const _time = await tokenFarm.calculateYieldTime(alice.address);
+      const formatTime = _time / 86400;
+      const staked = await tokenFarm.stakingBalance(alice.address);
+      const bal = staked * formatTime;
+      const newBal = ethers.utils.formatEther(bal.toString());
+      const expected = Number.parseFloat(newBal).toFixed(3);
 
       await tokenFarm.connect(alice).withdrawYield();
 
@@ -144,6 +144,18 @@ describe("TokenFarm", () => {
       res = await tokenFarm.amazingTokenBalance(alice.address);
       expect(Number(ethers.utils.formatEther(res))).to.be.approximately(
         10,
+        0.001
+      );
+    });
+
+    it("should return correct yield after partial unstake", async () => {
+      await time.increase(86400);
+      await tokenFarm.connect(alice).unstake(ethers.utils.parseEther("5"));
+      await time.increase(86400);
+      await tokenFarm.connect(alice).withdrawYield();
+      res = await amazingToken.balanceOf(alice.address);
+      expect(Number(ethers.utils.formatEther(res))).to.be.approximately(
+        15,
         0.001
       );
     });
