@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "local-node": "npx hardhat node",
+    "deploy-local": "npx hardhat run --network localhost scripts/deploy-token-farm.ts",
+    "test": "npx hardhat test"
+  },
   "devDependencies": {
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "@nomiclabs/hardhat-web3": "^2.0.0",
